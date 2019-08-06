@@ -1,6 +1,6 @@
 name: flutter_image_expansion
-description: A new flutter plugin project.
-version: 0.0.1
+description: get image exif. longitude.latitude  and save image exif
+version: 0.1.0
 author:
 homepage:
 

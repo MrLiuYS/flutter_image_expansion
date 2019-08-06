@@ -1,3 +1,4 @@
-## 0.0.1
+## 0.1.0
 
-* TODO: Describe initial release.
+* 获取图片的exif
+* 保存信息到图片中
