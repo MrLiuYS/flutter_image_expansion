@@ -1,8 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-import 'package:flutter/services.dart';
+// import 'package:flutter/services.dart';
 import 'package:flutter_image_expansion/flutter_image_expansion.dart';
+import 'package:flutter_image_expansion/image_expansion_bean.dart';
+
+import 'package:image_picker/image_picker.dart';
 
 void main() => runApp(MyApp());
 
@@ -12,31 +17,34 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
+  File _image;
 
+  ImageExpansionBean _originalImageBean;
+  double _sliderValue;
+  double _imageMaxLength;
+  ImageExpansionBean _imageBean;
   @override
   void initState() {
     super.initState();
-    initPlatformState();
+    this._sliderValue = 1.0;
+    _imageMaxLength = 0;
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      platformVersion = await FlutterImageExpansion.platformVersion;
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
+  Future getImage() async {
+    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
+    ImageExpansionBean bean =
+        await FlutterImageExpansion.imageQuality(image.path, 1);
 
     setState(() {
-      _platformVersion = platformVersion;
+      _image = image;
+      _originalImageBean = bean;
+      _imageBean = bean;
+
+      _imageMaxLength =
+          _originalImageBean.imageHeight > _originalImageBean.imageWidth
+              ? _originalImageBean.imageHeight
+              : _originalImageBean.imageWidth;
     });
   }
 
@@ -46,9 +54,86 @@ class _MyAppState extends State<MyApp> {
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Plugin example app'),
+          leading: FlatButton(
+            child: Text("+"),
+            onPressed: getImage,
+          ),
         ),
-        body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+        body: Column(
+          children: <Widget>[
+            Container(
+              child: Text(
+                  "图片大小${_imageBean?.imageLength}\n图片质量:$_sliderValue\n图片高度:${_imageBean?.imageHeight}\n图片宽度:${_imageBean?.imageWidth}"),
+            ),
+            Expanded(
+              child: _imageBean == null
+                  ? (_image == null
+                      ? Text('No image selected.')
+                      : Image.file(_image))
+                  : Image.memory(_imageBean.imageData),
+            ),
+            _originalImageBean == null
+                ? Container()
+                : Container(
+                    height: 200,
+                    color: Colors.grey,
+                    child: Column(
+                      children: <Widget>[
+                        Slider(
+                          label: "质量$_sliderValue",
+                          divisions: 10,
+                          activeColor: Colors.blue,
+                          value: this._sliderValue,
+                          onChanged: (double change) {
+                            setState(() {
+                              this._sliderValue = change;
+                            });
+                          },
+                          onChangeEnd: (double end) async {
+                            print("onChangeEnd: $end");
+
+                            ImageExpansionBean bean =
+                                await FlutterImageExpansion.imageQuality(
+                                    _image.path, end);
+
+                            setState(() {
+                              this._sliderValue = end;
+                              this._imageBean = bean;
+                            });
+                          },
+                        ),
+                        Slider(
+                          label: "最大边$_imageMaxLength",
+                          // divisions: 10,
+                          activeColor: Colors.blue,
+                          value: _imageMaxLength,
+                          onChanged: (double change) {
+                            setState(() {
+                              this._imageMaxLength = change;
+                            });
+                          },
+                          min: 320,
+                          max: 5000,
+                          onChangeEnd: (double end) async {
+                            print("onChangeEnd: $end");
+
+                            ImageExpansionBean bean =
+                                await FlutterImageExpansion.imageZoom(
+                              imageData: _originalImageBean.imageData,
+                              quality: _sliderValue,
+                              maxLength: end,
+                              imagePath: _image.path,
+                            );
+
+                            setState(() {
+                              this._imageMaxLength = end;
+                              this._imageBean = bean;
+                            });
+                          },
+                        )
+                      ],
+                    ))
+          ],
         ),
       ),
     );
