@@ -11,13 +11,22 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface BitmapUtil : NSObject
 
-+ (NSString *)getImageLongitude:(NSString *)imagePath;
-+ (NSString *)getImageLatitude:(NSString *)imagePath;
-+ (NSString *)getImagePhotoTime:(NSString *)imagePath;
++ (NSString *)getImageLongitudeFromData:(NSData *)data;
++ (NSString *)getImageLatitudeFromData:(NSData *)data;
++ (NSString *)getImagePhotoTimeFromData:(NSData *)data;
 
-+ (NSDictionary *)getImageAllInfo:(NSString *)imagePath;
 
-+ (BOOL)saveImageInfo:(NSString *)imagePath map:(NSDictionary *)map;
+/// 获取图片的信息
+//+ (NSDictionary *)getImageAllInfoFromPath:(NSString *)imagePath;
+
+/// 获取图片的信息
++ (NSDictionary *)getImageAllInfoFromData:(NSData *)data;
+
+/// 保存图片信息到data
+//+ (BOOL)saveImageInfoFromPath:(NSString *)imagePath map:(NSDictionary *)map;
+
+/// 保存图片信息到data
++ (NSMutableData *)saveImageInfoFromData:(NSData *)data map:(NSDictionary *)map ;
 
 @end
 

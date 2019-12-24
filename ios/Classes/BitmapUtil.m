@@ -10,11 +10,11 @@
 @implementation BitmapUtil
 
 
-+ (NSString *)getImageLongitude:(NSString *)imagePath{
++ (NSString *)getImageLongitudeFromData:(NSData *)data{
     
     NSString * longitude = @"";
     
-    NSDictionary * metaDataDic = [BitmapUtil getImageAllInfo:imagePath];
+    NSDictionary * metaDataDic = [BitmapUtil getImageAllInfoFromData:data];
     
     NSMutableDictionary *GPSDic =[[metaDataDic objectForKey:(NSString*)kCGImagePropertyGPSDictionary]mutableCopy];
     
@@ -29,11 +29,11 @@
     return longitude;
 }
 
-+ (NSString *)getImageLatitude:(NSString *)imagePath{
++ (NSString *)getImageLatitudeFromData:(NSData *)data{
     
     NSString * latitude = @"";
     
-    NSDictionary * metaDataDic = [BitmapUtil getImageAllInfo:imagePath];
+    NSDictionary * metaDataDic = [BitmapUtil getImageAllInfoFromData:data];
     
     NSMutableDictionary *GPSDic =[[metaDataDic objectForKey:(NSString*)kCGImagePropertyGPSDictionary]mutableCopy];
     
@@ -44,47 +44,56 @@
     return latitude;
 }
 
-+ (NSString *)getImagePhotoTime:(NSString *)imagePath{
++ (NSString *)getImagePhotoTimeFromData:(NSData *)data;{
     
     NSString * photoTime = @"";
     
-    NSDictionary * metaDataDic = [BitmapUtil getImageAllInfo:imagePath];
+    NSDictionary * metaDataDic = [BitmapUtil getImageAllInfoFromData:data];
     
     NSMutableDictionary *exifDic =[[metaDataDic objectForKey:(NSString*)kCGImagePropertyExifDictionary]mutableCopy];
     
     if (exifDic[(NSString *)kCGImagePropertyGPSLatitude]) {
         
         photoTime = [NSString stringWithFormat:@"%@",exifDic[(NSString *)kCGImagePropertyGPSLatitude]];
-        
-//        photoTime = exifDic[(NSString *)kCGImagePropertyTIFFDateTime];
     }
     
     return photoTime;
 }
 
-//获取图片所有的信息
-+ (NSDictionary *)getImageAllInfo:(NSString *)imagePath{
-    
-    NSData *data = [NSData dataWithContentsOfFile:imagePath];
+////获取图片所有的信息
+//+ (NSDictionary *)getImageAllInfoFromPath:(NSString *)imagePath{
+//    
+//    NSData *data = [NSData dataWithContentsOfFile:imagePath];
+//
+//    return [self  getImageAllInfoFromData:data];
+//}
 
+//获取图片所有的信息
++ (NSDictionary *)getImageAllInfoFromData:(NSData *)data{
+    
     CGImageSourceRef source = CGImageSourceCreateWithData((__bridge CFDataRef)data, NULL);
     
     NSDictionary *imageInfo = (__bridge NSDictionary*)CGImageSourceCopyPropertiesAtIndex(source, 0, NULL);
     
     NSMutableDictionary *metaDataDic = [imageInfo mutableCopy];
     
-    NSLog(@"图片信息：%@",metaDataDic);
-    
     return metaDataDic;
 }
 
-+ (BOOL)saveImageInfo:(NSString *)imagePath map:(NSDictionary *)map{
+
+//+ (BOOL)saveImageInfoFromPath:(NSString *)imagePath map:(NSDictionary *)map{
+//    
+//    NSData *data = [NSData dataWithContentsOfFile:imagePath];
+//    
+//    return  [self saveImageInfoFromData:data map:map];
+//    
+//}
+
++ (NSMutableData *)saveImageInfoFromData:(NSData *)data map:(NSDictionary *)map {
     
-    BOOL isSave = NO;
+    NSMutableData *newImageData;
     
     @try {
-        
-        NSData *data = [NSData dataWithContentsOfFile:imagePath];
         
         CGImageSourceRef source = CGImageSourceCreateWithData((__bridge CFDataRef)data, NULL);
         
@@ -97,20 +106,22 @@
         }
         
         CFStringRef UTI = CGImageSourceGetType(source);
-        NSMutableData *newImageData = [NSMutableData data];
+        newImageData = [NSMutableData data];
         CGImageDestinationRef destination = CGImageDestinationCreateWithData((__bridge CFMutableDataRef)newImageData, UTI, 1,NULL);
         
         CGImageDestinationAddImageFromSource(destination, source, 0, (__bridge CFDictionaryRef)metaDataDic);
         CGImageDestinationFinalize(destination);
         
-        isSave = YES;
+        
         
     } @catch (NSException *exception) {
-        isSave = NO;
+        newImageData = [NSMutableData dataWithData:data];
     } @finally {
-        return isSave;
+        return newImageData;
     }
     
 }
+
+
 
 @end
