@@ -58,15 +58,16 @@
     
     // 图片压缩
     if([@"imageCompress" isEqualToString:call.method]){
-        // 图片大小最大值
-        double maxDataLength = [call.arguments[@"maxDataLength"] doubleValue];
         
         if (call.arguments[@"maxImageLength"]) {
             double maxImageLength = [call.arguments[@"maxImageLength"] doubleValue];
-            if (maxImageLength > image.size.width || maxImageLength > image.size.height) {
+            if (maxImageLength < image.size.width || maxImageLength < image.size.height) {
                 image = [self imageZoomImage:image maxImageLength:maxImageLength];
             }
         }
+
+        // 图片大小最大值
+        double maxDataLength = [call.arguments[@"maxDataLength"] doubleValue];
         
         NSData * data = [self compressWithImage:image maxDataLength:maxDataLength];
         
@@ -180,6 +181,8 @@
         width = maxImageLength / height * width;
         
         height = maxImageLength;
+    }else {
+        return image;
     }
     UIImage * resultImage ;
     UIGraphicsBeginImageContext(CGSizeMake(width, height));

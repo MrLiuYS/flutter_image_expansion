@@ -43,6 +43,8 @@ class _MyAppState extends State<MyApp> {
     ImageExpansionBean bean = await FlutterImageExpansion.imageQuality(
         imagePath: image.path, quality: 1);
 
+
+
     setState(() {
       _image = image;
       _originalImageBean = bean;
@@ -53,8 +55,8 @@ class _MyAppState extends State<MyApp> {
 
       _imageMaxLength =
           _originalImageBean.imageHeight > _originalImageBean.imageWidth
-              ? _originalImageBean.imageHeight
-              : _originalImageBean.imageWidth;
+              ? _originalImageBean.imageHeight.toDouble()
+              : _originalImageBean.imageWidth.toDouble();
     });
   }
 

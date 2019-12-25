@@ -20,7 +20,7 @@ class FlutterImageExpansion {
     String imagePath,
     double maxDataLength,
     double maxImageLength,
-    bool keepExif = true,
+    bool keepExif = false,
   }) async {
     final Map<String, dynamic> params = <String, dynamic>{
       "maxDataLength": maxDataLength,
@@ -50,7 +50,7 @@ class FlutterImageExpansion {
     Uint8List imageData,
     String imagePath,
     double quality,
-    bool keepExif = true,
+    bool keepExif = false,
   }) async {
     final Map<String, dynamic> params = <String, dynamic>{
       "quality": quality,
@@ -76,7 +76,7 @@ class FlutterImageExpansion {
     Uint8List imageData,
     String imagePath,
     double maxImageLength,
-    bool keepExif = true,
+    bool keepExif = false,
   }) async {
     final Map<String, dynamic> params = <String, dynamic>{
       "maxImageLength": maxImageLength,
